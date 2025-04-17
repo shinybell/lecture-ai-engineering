@@ -29,7 +29,7 @@ data.ensure_initial_data()
 def load_model():
     """LLMモデルをロードする"""
     try:
-        device = "cuda" if torch.cuda.is_available() else "cpu"
+        device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
         st.info(f"Using device: {device}") # 使用デバイスを表示
         pipe = pipeline(
             "text-generation",

@@ -64,7 +64,7 @@ def load_model():
     """推論用のLLMモデルを読み込む"""
     global model  # グローバル変数を更新するために必要
     try:
-        device = "cuda" if torch.cuda.is_available() else "cpu"
+        device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
         print(f"使用デバイス: {device}")
         pipe = pipeline(
             "text-generation",
@@ -87,7 +87,7 @@ def extract_assistant_response(outputs, user_prompt):
     try:
         if outputs and isinstance(outputs, list) and len(outputs) > 0 and outputs[0].get("generated_text"):
             generated_output = outputs[0]["generated_text"]
-            
+
             if isinstance(generated_output, list):
                 # メッセージフォーマットの場合
                 if len(generated_output) > 0:
@@ -102,7 +102,7 @@ def extract_assistant_response(outputs, user_prompt):
             elif isinstance(generated_output, str):
                 # 文字列形式の場合
                 full_text = generated_output
-                
+
                 # 単純なプロンプト入力の場合、プロンプト後の全てを抽出
                 if user_prompt:
                     prompt_end_index = full_text.find(user_prompt)
