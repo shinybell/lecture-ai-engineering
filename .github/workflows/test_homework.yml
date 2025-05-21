@@ -1,0 +1,68 @@
+name: ML Pipeline CI (Homework)
+
+on:
+  # push:
+  #   branches: [ main, master  ]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest great_expectations pandas scikit-learn flake8 black mypy pytest-cov
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Lint with flake8
+        run: |
+          flake8 day5/宿題 --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 day5/宿題 --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+
+      - name: Format check with black
+        run: |
+          black --check day5/宿題
+
+      - name: Run data tests
+        run: |
+          pytest day5/宿題/tests/test_data.py -v
+
+      - name: Run model tests
+        run: |
+          pytest day5/宿題/tests/test_model.py -v
+
+      - name: Checkout main branch for baseline accuracy
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          path: main-branch
+
+      - name: Get baseline accuracy
+        run: |
+          cd main-branch
+          python day5/宿題/tests/test_acc.py > baseline_output.txt
+          echo "BASELINE_ACC=$(grep -oP 'Accuracy: \K[0-9.]+' baseline_output.txt || echo '0.0')" >> $GITHUB_ENV
+          cd ..
+
+      - name: Checkout current branch again
+        uses: actions/checkout@v3
+
+      - name: Get current accuracy
+        run: |
+          python day5/宿題/tests/test_acc.py > current_output.txt
+          echo "CURRENT_ACC=$(grep -oP 'Accuracy: \K[0-9.]+' current_output.txt || echo '0.0')" >> $GITHUB_ENV
+
+      - name: Compare accuracy
+        run: |
+          echo "Baseline accuracy: ${{ env.BASELINE_ACC }}"
+          echo "Current accuracy: ${{ env.CURRENT_ACC }}"
+          python -c "import sys; baseline=${{ env.BASELINE_ACC }}; current=${{ env.CURRENT_ACC }}; print(f'Accuracy change: {current - baseline:.6f}'); sys.exit(0 if current >= baseline else 1)"
