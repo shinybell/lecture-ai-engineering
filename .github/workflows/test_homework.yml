@@ -2,9 +2,9 @@ name: ML Pipeline CI (Homework)
 
 on:
   # push:
-  #   branches: [ main, master  ]
+  #   branches: [ master, master  ]
   pull_request:
-    branches: [main, master]
+    branches: [master, master]
 
 jobs:
   test:
@@ -40,15 +40,15 @@ jobs:
         run: |
           pytest day5/宿題/tests/test_model.py -v
 
-      - name: Checkout main branch for baseline accuracy
+      - name: Checkout master branch for baseline accuracy
         uses: actions/checkout@v3
         with:
-          ref: main
-          path: main-branch
+          ref: master
+          path: master-branch
 
       - name: Get baseline accuracy
         run: |
-          cd main-branch
+          cd master-branch
           python day5/宿題/tests/test_acc.py > baseline_output.txt
           echo "BASELINE_ACC=$(grep -oP 'Accuracy: \K[0-9.]+' baseline_output.txt || echo '0.0')" >> $GITHUB_ENV
           cd ..
