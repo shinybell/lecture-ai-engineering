@@ -8,6 +8,7 @@ from sklearn.metrics import accuracy_score
 DATA_PATH = os.path.join(os.path.dirname(__file__), "../data/Titanic.csv")
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "../models/titanic_model.pkl")
 
+
 def main():
     """モデルを読み込み、精度を評価して出力する"""
     # データの読み込み
@@ -33,6 +34,7 @@ def main():
         print(f"Accuracy: {accuracy:.6f}")
     else:
         print("Accuracy: 0.000000")  # モデルが存在しない場合
+
 
 if __name__ == "__main__":
     main()
